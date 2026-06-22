@@ -1,15 +1,25 @@
-const mongoose = require('mongoose');
+const pool = require('../../config/database');
 const bcrypt = require('bcryptjs');
 
-const usuarioSchema = new mongoose.Schema({
-    nome: { type: String, required: [true, 'Nome é obrigatório'] },
-    email: { type: String, required: [true, 'Email é obrigatório'], unique: true },
-    senha: { type: String, required: [true, 'Senha é obrigatória'] }
-});
+class UsuarioModel {
+    static async findByEmail(email) {
+        const sql = 'SELECT * FROM usuarios WHERE email = ? LIMIT 1';
+        const [rows] = await pool.execute(sql, [email]);
+        return rows.length > 0 ? rows[0] : null;
+    }
 
-usuarioSchema.pre('save', async function () {
-    if (!this.isModified('senha')) return;
-    this.senha = await bcrypt.hash(this.senha, 10);
-});
+    static async findById(id) {
+        const sql = 'SELECT * FROM usuarios WHERE id = ? LIMIT 1';
+        const [rows] = await pool.execute(sql, [id]);
+        return rows.length > 0 ? rows[0] : null;
+    }
 
-module.exports = mongoose.model('Usuario', usuarioSchema);
+    static async create({ nome, email, senha }) {
+        const hash = await bcrypt.hash(senha, 10);
+        const sql = 'INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)';
+        const [result] = await pool.execute(sql, [nome, email, hash]);
+        return { id: result.insertId, nome, email };
+    }
+}
+
+module.exports = UsuarioModel;

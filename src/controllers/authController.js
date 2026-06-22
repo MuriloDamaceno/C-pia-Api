@@ -11,14 +11,14 @@ exports.registrar = async (req, res) => {
             return res.status(400).json({ mensagem: 'Nome, email e senha são obrigatórios' });
         }
 
-        const usuarioExiste = await Usuario.findOne({ email });
+        const usuarioExiste = await Usuario.findByEmail(email);
         if (usuarioExiste) {
             return res.status(400).json({ mensagem: 'Email já cadastrado' });
         }
 
         const usuario = await Usuario.create({ nome, email, senha });
 
-        res.status(201).json({ mensagem: 'Usuário criado com sucesso', id: usuario._id });
+        res.status(201).json({ mensagem: 'Usuário criado com sucesso', id: usuario.id });
     } catch (error) {
         if (error.name === 'ValidationError') {
             return res.status(400).json({ mensagem: 'Dados inválidos ao registrar', erro: error.message });
@@ -32,7 +32,7 @@ exports.login = async (req, res) => {
     try {
         const { email, senha } = req.body;
 
-        const usuario = await Usuario.findOne({ email });
+        const usuario = await Usuario.findByEmail(email);
         if (!usuario) {
             return res.status(401).json({ mensagem: 'Email ou senha inválidos' });
         }
@@ -43,7 +43,7 @@ exports.login = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { id: usuario._id },
+            { id: usuario.id || usuario.ID || usuario.id_usuario || usuario.user_id },
             process.env.JWT_SECRET,
             { expiresIn: '1d' }
         );

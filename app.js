@@ -3,6 +3,8 @@ const express = require('express');
 const conectarDB = require('./src/config/db');
 const authRoutes = require('./src/routes/authRoutes');
 const produtoRoutes = require('./src/routes/produtoRoutes');
+const apiRoutes = require('./src/routes/apiRoutes');
+const categoriaRoutes = require('./src/routes/categoriaRoutes');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 
@@ -73,6 +75,8 @@ app.get('/api/hello', (req, res) => {
 // Rotas
 app.use('/auth', authRoutes);
 app.use('/produtos', produtoRoutes);
+app.use('/api', apiRoutes);
+app.use('/api/categorias', categoriaRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
